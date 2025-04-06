@@ -1,0 +1,14 @@
+.venv
+__pycache__
+*.pyc
+*.pkl
+*.csv
+*.json
+*.html
+*.npy
+*.pt
+*.pth
+*.ptl
+*.ptm
+*.ptm.gz
+*.ptm.tar.gz
