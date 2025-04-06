@@ -28,12 +28,29 @@ This guide provides instructions for local development and deploying the SHL Ass
    pip install -r requirements.txt
    ```
 
-4. Run the application locally:
+4. Run the application:
+   
+   **Single Command Setup (Recommended)**
    ```
    streamlit run app.py
    ```
+   The API server will automatically start in the background.
+   
+   **Alternative Options**
+   
+   If you prefer the explicit start scripts:
+   ```
+   # On Windows
+   .\start_all.bat
+   
+   # On macOS/Linux
+   bash start_all.sh
+   ```
 
-5. Access the application at http://localhost:8501
+5. Access the applications:
+   - Streamlit web interface: http://localhost:8501
+   - FastAPI server: http://localhost:8000
+   - API documentation: http://localhost:8000/docs
 
 ### Working with the Model
 
@@ -49,7 +66,7 @@ The application uses a locally stored sentence transformer model for reliable de
 ### Making Changes
 
 1. Make changes to the code
-2. Test changes locally with `streamlit run app.py`
+2. Test changes locally by running `streamlit run app.py`
 3. Commit and push changes:
    ```
    git add .
@@ -68,6 +85,43 @@ The application uses a locally stored sentence transformer model for reliable de
    - Branch: main
    - Main file path: app.py
    - Python version: 3.9 (as specified in runtime.txt)
+
+### API Deployment Options
+
+The FastAPI server is automatically started when the Streamlit app runs, but there are other deployment options as well:
+
+#### Option 1: Integrated with Streamlit (Default)
+- The API server starts automatically with the Streamlit app
+- No additional setup required
+- Suitable for most use cases with moderate traffic
+
+#### Option 2: Separate Deployment
+- For high-traffic scenarios, you may want to deploy the API separately using a service like:
+  - [Render](https://render.com/)
+  - [Heroku](https://www.heroku.com/)
+  - [DigitalOcean App Platform](https://www.digitalocean.com/products/app-platform/)
+  - [AWS Elastic Beanstalk](https://aws.amazon.com/elasticbeanstalk/)
+- If you choose this option, you'll need to update the Streamlit app to point to the new API URL by modifying the API endpoint URLs in app.py
+
+#### Option 3: Containerized Deployment
+1. Create a Dockerfile:
+   ```
+   FROM python:3.9-slim
+   
+   WORKDIR /app
+   COPY . .
+   
+   RUN pip install --no-cache-dir -r requirements.txt
+   
+   EXPOSE 8000
+   
+   CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
+   ```
+
+2. Build and deploy the Docker container to a service like:
+   - AWS ECS
+   - Google Cloud Run
+   - Azure Container Instances
 
 ### Managing Large Files
 
@@ -117,4 +171,5 @@ If your app fails to deploy, check:
 3. Python version in runtime.txt
 4. Permissions for your repository on GitHub
 5. Git LFS configuration and file availability
-6. Model directory structure and paths in the code 
+6. Model directory structure and paths in the code
+7. API server subprocess launching (check if your hosting platform allows subprocess creation) 
