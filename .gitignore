@@ -1,14 +1,15 @@
 .venv
 __pycache__
 *.pyc
-*.pkl
+# Allow pkl and model files to be tracked by Git LFS
+# *.pkl
+# *.pt
+# *.pth
+# *.ptl
+# *.ptm
+# *.ptm.gz
+# *.ptm.tar.gz
 *.csv
-*.json
+
 *.html
-*.npy
-*.pt
-*.pth
-*.ptl
-*.ptm
-*.ptm.gz
-*.ptm.tar.gz
+*.npygit commit
