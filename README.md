@@ -77,7 +77,7 @@ The application includes a pre-downloaded sentence transformer model to ensure r
 
 ### Deployment URL
 
-The application is deployed on Streamlit Cloud at [https://shl-assessment-recommender.streamlit.app](https://shl-assessment-recommender-jhmy9wo47d8vhzmzkkna4t.streamlit.app/)
+The application is deployed on Streamlit Cloud at [https://shl-assessment-recommender-jhmy9wo47d8vhzmzkkna4t.streamlit.app/](https://shl-assessment-recommender-jhmy9wo47d8vhzmzkkna4t.streamlit.app/)
 
 ## 📝 Usage
 
