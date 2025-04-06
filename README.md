@@ -12,6 +12,7 @@ This application leverages sentence transformers and semantic search to match jo
 - **URL Processing**: Can extract and process text from job description URLs
 - **Customizable Results**: Returns top matches with similarity scores and key information
 - **User-Friendly Interface**: Clean Streamlit interface for easy interaction
+- **Local Model**: Uses a pre-downloaded model for reliable deployment without internet dependency
 
 ## 🛠️ Technology Stack
 
@@ -62,10 +63,19 @@ The application will be available at http://localhost:8501
 
 ## 📊 Data
 
-This application uses a preprocessed catalog of SHL assessments with precomputed embeddings stored in:
+This application uses:
 - `shl_catalog_with_embeddings.pkl`: Contains both the assessment details and their vector embeddings
+- `models/all-MiniLM-L6-v2/`: Contains the pre-downloaded sentence transformer model for reliable deployment
 
 ## 🌐 Deployment
+
+### Model Management
+
+The application includes a pre-downloaded sentence transformer model to ensure reliable deployment without issues:
+- The model is stored in the `models/all-MiniLM-L6-v2/` directory
+- To update the model, run `python download_model.py`
+
+### Deployment URL
 
 The application is deployed on Streamlit Cloud at [https://shl-assessment-recommender.streamlit.app](https://shl-assessment-recommender.streamlit.app)
 
@@ -82,6 +92,7 @@ The application was developed through the following steps:
 2. Text embedding generation (`text_embedding.ipynb`)
 3. Development of the recommendation engine
 4. Creation of the Streamlit user interface
+5. Local model implementation for reliable deployment
 
 ## 📄 License
 

@@ -35,6 +35,17 @@ This guide provides instructions for local development and deploying the SHL Ass
 
 5. Access the application at http://localhost:8501
 
+### Working with the Model
+
+The application uses a locally stored sentence transformer model for reliable deployment:
+
+1. The model is pre-downloaded and stored in the `models/all-MiniLM-L6-v2/` directory
+2. If you need to re-download or update the model:
+   ```
+   python download_model.py
+   ```
+3. The app is configured to use the local model, but will fall back to downloading the model if it's not found locally
+
 ### Making Changes
 
 1. Make changes to the code
@@ -60,7 +71,7 @@ This guide provides instructions for local development and deploying the SHL Ass
 
 ### Managing Large Files
 
-For large files like `shl_catalog_with_embeddings.pkl`, we use Git LFS:
+For large files like `shl_catalog_with_embeddings.pkl` and the model files, we use Git LFS:
 
 1. Install Git LFS:
    ```
@@ -73,6 +84,8 @@ For large files like `shl_catalog_with_embeddings.pkl`, we use Git LFS:
    # Already configured in .gitattributes
    # *.pkl filter=lfs diff=lfs merge=lfs -text
    # *.csv filter=lfs diff=lfs merge=lfs -text
+   # models/** filter=lfs diff=lfs merge=lfs -text
+   # *.bin filter=lfs diff=lfs merge=lfs -text
    ```
 
 3. Add and commit files:
@@ -81,6 +94,15 @@ For large files like `shl_catalog_with_embeddings.pkl`, we use Git LFS:
    git commit -m "Add large files with Git LFS"
    git push origin main
    ```
+
+### Ensuring Model Availability
+
+To ensure the model is available during deployment:
+
+1. Make sure all model files are committed with Git LFS
+2. Check that the `.gitattributes` file is correctly configured
+3. Confirm that Streamlit Cloud has access to the Git LFS files
+4. If needed, you can download the model files directly to the deployment server using the Streamlit Cloud secrets management
 
 ### Automatic Redeployment
 
@@ -93,4 +115,6 @@ If your app fails to deploy, check:
 1. Logs on the Streamlit Cloud dashboard
 2. Dependencies in requirements.txt
 3. Python version in runtime.txt
-4. Permissions for your repository on GitHub 
+4. Permissions for your repository on GitHub
+5. Git LFS configuration and file availability
+6. Model directory structure and paths in the code 

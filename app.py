@@ -8,6 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 import numpy as np
 import time
+import os
 
 # Page config
 st.set_page_config(
@@ -51,7 +52,22 @@ st.markdown("""
 # Load model
 @st.cache_resource
 def load_model():
-    return SentenceTransformer('all-MiniLM-L6-v2')
+    try:
+        # Path to the local model
+        model_path = os.path.join('models', 'all-MiniLM-L6-v2')
+        
+        # Check if the model exists locally
+        if os.path.exists(model_path):
+            st.info("Loading model from local directory...")
+            return SentenceTransformer(model_path)
+        else:
+            # Fallback to online model if local doesn't exist
+            st.warning("Local model not found. Downloading from HuggingFace...")
+            return SentenceTransformer('all-MiniLM-L6-v2')
+    except Exception as e:
+        st.error(f"Error loading model: {str(e)}")
+        st.error("Please check the model directory or your internet connection.")
+        raise e
 
 # Load data and precomputed embeddings
 @st.cache_data
