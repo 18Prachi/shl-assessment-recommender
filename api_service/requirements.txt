@@ -5,6 +5,19 @@ pandas
 sentence-transformers
 scikit-learn
 numpy
+streamlit
+sentence-transformers
+scikit-learn
+pandas
+beautifulsoup4
+requests
+selenium
+trafilatura  
+transformers==4.36.2
+torch
+fastapi
+uvicorn
+numpy
 
 # Add any other specific dependencies your loading/processing requires
 # For example, if your .pkl needs a specific version of pandas or scikit-learn
