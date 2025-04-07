@@ -8,7 +8,7 @@ import time
 
 # --- Configuration ---
 # !!! IMPORTANT: Replace this with the actual URL of your deployed API !!!
-API_ENDPOINT_URL = "hhttps://shl-assessment-recommender-5hab.onrender.com" # Include the trailing slash and endpoint path
+API_ENDPOINT_URL = "https://shl-assessment-recommender-5hab.onrender.com" # Include the trailing slash and endpoint path
 
 # Page config
 st.set_page_config(
