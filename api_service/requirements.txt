@@ -1,0 +1,12 @@
+# api_service/requirements.txt
+fastapi
+uvicorn[standard]
+pandas
+sentence-transformers
+scikit-learn
+numpy
+
+# Add any other specific dependencies your loading/processing requires
+# For example, if your .pkl needs a specific version of pandas or scikit-learn
+# pandas==<specific_version>
+# scikit-learn==<specific_version> 

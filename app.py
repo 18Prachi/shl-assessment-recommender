@@ -1,14 +1,14 @@
 # app.py
 import streamlit as st
 import pandas as pd
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
 import re
 import requests
 from bs4 import BeautifulSoup
-import numpy as np
 import time
-import os
+
+# --- Configuration ---
+# !!! IMPORTANT: Replace this with the actual URL of your deployed API !!!
+API_ENDPOINT_URL = "YOUR_DEPLOYED_API_URL_HERE/recommend/" # Include the trailing slash and endpoint path
 
 # Page config
 st.set_page_config(
@@ -49,42 +49,24 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Load model
-@st.cache_resource
-def load_model():
-    try:
-        # Path to the local model
-        model_path = os.path.join('models', 'all-MiniLM-L6-v2')
-        
-        # Check if the model exists locally
-        if os.path.exists(model_path):
-            st.info("Loading model from local directory...")
-            return SentenceTransformer(model_path)
-        else:
-            # Fallback to online model if local doesn't exist
-            st.warning("Local model not found. Downloading from HuggingFace...")
-            return SentenceTransformer('all-MiniLM-L6-v2')
-    except Exception as e:
-        st.error(f"Error loading model: {str(e)}")
-        st.error("Please check the model directory or your internet connection.")
-        raise e
-
-# Load data and precomputed embeddings
-@st.cache_data
-def load_data():
-    catalog, embeddings = pd.read_pickle("shl_catalog_with_embeddings.pkl")
-    embeddings = np.vstack(embeddings)
-    return catalog, embeddings
-
 # App header
 st.markdown('<div class="main-header">🔍 SHL Assessment Recommender</div>', unsafe_allow_html=True)
 st.markdown('<div class="subheader">Find the perfect assessment for your job requirements</div>', unsafe_allow_html=True)
 
-# Load resources
-with st.spinner("Loading resources..."):
-    model = load_model()
-    catalog, embeddings = load_data()
-    st.success("✅ System ready!")
+# Display a ready message or check API health (optional)
+if "YOUR_DEPLOYED_API_URL_HERE" in API_ENDPOINT_URL:
+     st.warning("⚠️ API URL not configured. Please update `API_ENDPOINT_URL` in `app.py` after deploying the API.")
+else:
+     # Optional: Add a quick health check to the API here if desired
+     try:
+        health_url = API_ENDPOINT_URL.replace("/recommend/", "/health")
+        response = requests.get(health_url, timeout=5)
+        if response.status_code == 200 and response.json().get("status") == "ok":
+             st.success("✅ System ready! Connected to recommendation API.")
+        else:
+             st.error(f"❌ Could not connect to recommendation API at {health_url}. Status: {response.status_code}. Please check if the API service is running.")
+     except requests.exceptions.RequestException as e:
+        st.error(f"❌ Failed to connect to the recommendation API: {e}")
 
 # Sidebar
 with st.sidebar:
@@ -131,26 +113,58 @@ def recommend(query_text: str, top_n=5):
         st.warning("Please enter a valid query or URL with extractable content.")
         return None
         
-    with st.spinner("Analyzing text and finding matches..."):
-        # Add slight delay for UX
-        time.sleep(0.5)
-        
-        query_embedding = model.encode([clean_text])
-        scores = cosine_similarity(query_embedding, embeddings)[0]
+    if "YOUR_DEPLOYED_API_URL_HERE" in API_ENDPOINT_URL:
+        st.error("API URL is not configured in app.py. Cannot fetch recommendations.")
+        return None
 
-        catalog["similarity"] = scores
-        deduped = catalog.sort_values("similarity", ascending=False).drop_duplicates(subset=["Test Name"])
+    with st.spinner("Contacting recommendation API..."):
+        try:
+            # Prepare parameters for the API call
+            params = {"query": clean_text, "top_n": top_n}
 
-        top_results = deduped.head(top_n).copy()
-        top_results["similarity"] = top_results["similarity"].round(3)
-        
-        # Convert similarity to percentage
-        top_results["match_percentage"] = (top_results["similarity"] * 100).astype(int)
+            # Make the request to the FastAPI endpoint
+            response = requests.get(API_ENDPOINT_URL, params=params, timeout=30) # Increased timeout for potentially slow model inference
 
-        return top_results[[
-            "Test Name", "Link", "Remote Testing", "Adaptive/IRT", 
-            "duration", "Test Types", "similarity", "match_percentage"
-        ]]
+            # Check if the request was successful
+            response.raise_for_status() # Raises HTTPError for bad responses (4xx or 5xx)
+
+            # Parse the JSON response
+            result_json = response.json()
+
+            # Extract recommendations
+            recommendations_list = result_json.get("recommendations", [])
+
+            if not recommendations_list:
+                st.info("No matching recommendations found by the API.")
+                return None
+
+            # Convert the list of dictionaries back to a DataFrame for display
+            recommendations_df = pd.DataFrame(recommendations_list)
+
+            # Ensure required columns exist (optional, but good practice)
+            required_cols = ["Test Name", "Link", "Remote Testing", "Adaptive/IRT",
+                             "duration", "Test Types", "similarity", "match_percentage"]
+            if not all(col in recommendations_df.columns for col in required_cols):
+                 st.error("API response is missing expected recommendation data.")
+                 return None
+
+            return recommendations_df
+
+        except requests.exceptions.HTTPError as http_err:
+            st.error(f"API request failed: {http_err} - {response.text}")
+            return None
+        except requests.exceptions.ConnectionError as conn_err:
+            st.error(f"Could not connect to the API: {conn_err}")
+            return None
+        except requests.exceptions.Timeout as timeout_err:
+            st.error(f"API request timed out: {timeout_err}")
+            return None
+        except requests.exceptions.RequestException as req_err:
+            st.error(f"An error occurred during the API request: {req_err}")
+            return None
+        except Exception as e:
+            st.error(f"An unexpected error occurred while processing the recommendations: {e}")
+            return None
 
 # Main app area
 st.subheader("Enter your job requirements")
